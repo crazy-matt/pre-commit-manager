@@ -74,20 +74,57 @@ git checkout "${latest_tag}" "${baseline_precommit_config_file}"
 
 echo -e "\033[1;32m[✓]\033[0m Baseline config latest release downloaded"
 
-# Build the find parameters to exclude any folders declared in the env var PRECOMMIT_EXCLUDE
-custom_filter=""
+# Build the find parameters to exclude/include any folders declared in the bash environment
+custom_exclusion_filter=""
 for pattern in ${PRECOMMIT_EXCLUDE//,/ }; do
-  custom_filter="$custom_filter -o -path '$pattern' -prune"
+  if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
+    pattern="${pattern}*"
+  fi
+  custom_exclusion_filter="$custom_exclusion_filter -o -path '$pattern' -prune"
+done
+
+custom_inclusion_filter=""
+for pattern in ${PRECOMMIT_INCLUDE//,/ }; do
+  if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
+    pattern="${pattern}*"
+  fi
+  if [[ "${custom_inclusion_filter}" == "" ]]; then
+    custom_inclusion_filter="-path '$pattern'"
+  else
+    custom_inclusion_filter="$custom_inclusion_filter -o -path '$pattern'"
+  fi
 done
 
 # Build the git repo list located on the hard drive under the HOME directory
-repo_list=$(eval "find $HOME -type d -not \( -path '/Users/${USER}/Library' -prune \
-  -o -path '/Users/${USER}/Pictures' -prune \
-  -o -path '/Users/${USER}/.*' -prune \
-  -o -path '*.terraform/*' -prune \
-  -o -path '*.terragrunt-cache/*' -prune \
-  -o -path '*.history/*' -prune \
-  ${custom_filter} \) -iname '.git' -prune")
+repo_exclusion_list=$(eval "find $HOME -type d \
+  -not \( \
+    -path '${HOME}/Library' -prune \
+    -o -path '${HOME}/Pictures' -prune \
+    -o -path '${HOME}/.*' -prune \
+    -o -path '*.terraform/*' -prune \
+    -o -path '*.terragrunt-cache/*' -prune \
+    -o -path '*.history/*' -prune \
+    ${custom_exclusion_filter} \
+  \) \
+  -iname '.git' -prune" \
+)
+
+if [[ -n "${PRECOMMIT_INCLUDE}" ]]; then
+  repo_inclusion_list=$(eval "find $HOME -type d \
+    -not \( \
+      -path '${HOME}/Library' -prune \
+      -o -path '${HOME}/Pictures' -prune \
+      -o -path '${HOME}/.*' -prune \
+      -o -path '*.terraform/*' -prune \
+      -o -path '*.terragrunt-cache/*' -prune \
+      -o -path '*.history/*' -prune \
+    \) \
+    \( ${custom_inclusion_filter} \) \
+    -iname '.git' -prune" \
+  )
+fi
+
+repo_list="$(sort -u <(printf '%s\n' "${repo_exclusion_list}") <(printf '%s\n' "${repo_inclusion_list}"))"
 
 total_count=0
 updated_count=0
