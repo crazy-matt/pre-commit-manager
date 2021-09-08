@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2143
+# shellcheck disable=SC2143,SC2015
 set -e
 
 installer_location="$HOME/.local/var/pre-commit-manager"
 
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit hooks deployer cron jobs [y/N]: ' answer
 else
   answer=y
@@ -30,7 +30,7 @@ fi
 
 
 answer=n; answer2=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit hooks from all your repositories [y/N]: ' answer
   read -r -p 'Do you also want to remove all pre-commit baseline configs (.yaml) [y/N]: ' answer2
 else
@@ -94,27 +94,29 @@ if [[ "${answer}" == "y" ]]; then
 
   for repo in ${repo_list}; do
     repo_path="${repo%/.git}"
+    echo -e "\033[1;32m[✓]\033[0m repo \033[1;34m${repo_path}\033[0m"
     if [[ "${answer2}" == "y" ]]; then
-      rm -f "${repo_path}/.pre-commit-config.yaml"
-      echo -e "\033[1;32m[✓]\033[0m pre-commit baseline config removed from repo \033[1;34m${repo_path}\033[0m"
+      if [[ -f "${repo_path}/.pre-commit-config.yaml" ]]; then
+        rm -f "${repo_path}/.pre-commit-config.yaml"
+        echo -e "   * pre-commit manager baseline config removed..."
+      fi
     fi
-    if [[ -f "${repo_path}/.git/hook/pre-push" || -f "${repo_path}/.git/hook/commit-msg" ]]; then
+    if [[ -f "${repo_path}/.git/hooks/commit-msg" || -f "${repo_path}/.git/hooks/pre-commit" || -f "${repo_path}/.git/hooks/pre-push" ]]; then
       cd "${repo_path}"
-      pre-commit uninstall >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/pre-push" >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/pre-commit" >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/commit-msg" >/dev/null 2>&1
-      echo -e "\033[1;32m[✓]\033[0m pre-commit hooks removed from repo \033[1;34m${repo_path}\033[0m"
+      [[ -n "$(command -v pre-commit)" ]] && printf '%s\n' "   * $(pre-commit uninstall)" || true
+      rm "${repo_path}/.git/hooks/commit-msg" 2>/dev/null && echo -e "   * Hook commit-msg removed"
+      rm "${repo_path}/.git/hooks/pre-commit" 2>/dev/null && echo -e "   * Hook pre-commit removed"
+      rm "${repo_path}/.git/hooks/pre-push" 2>/dev/null && echo -e "   * Hook pre-push removed"
       cd - &>/dev/null
     fi
   done
 fi
 
 # Clean out cached pre-commit files
-pre-commit clean
+[[ -n "$(command -v pre-commit)" ]] && pre-commit clean || true
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to uninstall the pre-commit framework binaries (pre-commit itself) [y/N]: ' answer
 else
   answer=y
@@ -129,15 +131,15 @@ if [[ "${answer}" == "y" ]]; then
   esac;
   
   if [[ "${MACHINE}" == "darwin" ]]; then
-    brew uninstall pre-commit
+    brew uninstall pre-commit || true
   elif [[ "${MACHINE}" == "linux" ]]; then
     [[ -n "$(command -v yum)" ]] && MACHINE=redhat
     [[ -n "$(command -v apt-get)" ]] && MACHINE=debian
     
     if [[ "${MACHINE}" == "redhat" ]]; then
-      yum remove pre-commit
+      yum remove pre-commit || true
     elif [[ "${MACHINE}" == "debian" ]]; then
-      apt-get remove pre-commit
+      apt-get remove pre-commit || true
     else
       echo -e "ERROR - OS unsupported"
       exit 1
@@ -146,12 +148,12 @@ if [[ "${answer}" == "y" ]]; then
     echo -e "ERROR - OS unsupported"
     exit 1
   fi
-  echo -e "\033[1;32m[✓]\033[0m pre-commit framework binaries uninstalled"
+  echo -e "\033[1;32m[✓]\033[0m pre-commit framework binaries removed"
 fi
 
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit manager sources [y/N]: ' answer
 else
   answer=y

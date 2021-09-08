@@ -183,6 +183,8 @@ You will be guided by the uninstallation script `sources/uninstall-precommit.sh`
 git clone git@github.com:crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/uninstall-precommit.sh
+# or
+./sources/uninstall-precommit.sh -q # to get rid off everything in one shot
 ```
 
 ## Maintenance
