@@ -40,7 +40,8 @@ pre-commit clean
 echo -e "\033[1;32m[✓]\033[0m pre-commit cache cleaned up"
 
 # Creating the script in charge of scanning the disk for any git repository and deploying the hooks
-rm -f "${installer_location}/deploy_hooks.sh"
+rm -rf "${installer_location}"
+mkdir -p "${installer_location}"
 touch "${installer_location}/deploy_hooks.sh"
 cat > "${installer_location}/deploy_hooks.sh" <<WITH_INTERPOLATION
 #!/usr/bin/env bash
@@ -61,6 +62,10 @@ fi
 cd "${installer_location}/repository" || exit 1
 git fetch --tags --prune -f
 latest_tag="$(git tag --contains | sort -V | tail -n1)"
+if [[ -z "${latest_tag}" ]]; then
+  echo -e "\033[1;37m\033[41mThe source repository does not offer any release. Hooks deployment interrupted.\033[0m"
+  exit 1
+fi
 previous_tag="$(git tag --contains | sort -V | tail -n2 | head -n1)"
 
 # Get the previous release config file byte count to compare it later on with the one in repos
@@ -74,20 +79,15 @@ git checkout "${latest_tag}" "${baseline_precommit_config_file}"
 
 echo -e "\033[1;32m[✓]\033[0m Baseline config latest release downloaded"
 
-# Build the find parameters to exclude/include any folders declared in the bash environment
+# Build the find parameters to exclude/include any folders declared in the bash environment variables
 custom_exclusion_filter=""
 for pattern in ${PRECOMMIT_EXCLUDE//,/ }; do
-  if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-    pattern="${pattern}*"
-  fi
   custom_exclusion_filter="$custom_exclusion_filter -o -path '$pattern' -prune"
 done
 
 custom_inclusion_filter=""
 for pattern in ${PRECOMMIT_INCLUDE//,/ }; do
-  if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-    pattern="${pattern}*"
-  fi
+  pattern="${pattern}/.git"
   if [[ "${custom_inclusion_filter}" == "" ]]; then
     custom_inclusion_filter="-path '$pattern'"
   else
@@ -120,7 +120,7 @@ if [[ -n "${PRECOMMIT_INCLUDE}" ]]; then
       -o -path '*.history/*' -prune \
     \) \
     \( ${custom_inclusion_filter} \) \
-    -iname '.git' -prune" \
+    -prune" \
   )
 fi
 
@@ -141,7 +141,7 @@ for repo in ${repo_list}; do
     unset current_config_byte_count
   fi
 
-  # Config deployed if no config exists or if the config in repo matches exactly the previous release.
+  # Baseline config deployed if no config exists or if the config in repo matches exactly the release just before.
   # In that former case, we push the upgrade, because if the config has not been updated manually,
   # then the user is potentially interested in staying in a "managed" mode
   if [[ ! -f "${repo_path}/.pre-commit-config.yaml" ]] || [[ ${current_config_byte_count} == "${previous_config_byte_count}" ]]; then

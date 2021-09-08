@@ -46,18 +46,13 @@ if [[ "${answer}" == "y" ]]; then
   custom_exclusion_filter=""
   # shellcheck disable=SC2153
   for pattern in ${PRECOMMIT_EXCLUDE//,/ }; do
-    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-      pattern="${pattern}*"
-    fi
     custom_exclusion_filter="$custom_exclusion_filter -o -path '$pattern' -prune"
   done
 
   custom_inclusion_filter=""
   # shellcheck disable=SC2153
   for pattern in ${PRECOMMIT_INCLUDE//,/ }; do
-    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-      pattern="${pattern}*"
-    fi
+    pattern="${pattern}/.git"
     if [[ "${custom_inclusion_filter}" == "" ]]; then
       custom_inclusion_filter="-path '$pattern'"
     else
@@ -91,7 +86,7 @@ if [[ "${answer}" == "y" ]]; then
         -o -path '*.history/*' -prune \
       \) \
       \( ${custom_inclusion_filter} \) \
-      -iname '.git' -prune" \
+      -prune" \
     )
   fi
 

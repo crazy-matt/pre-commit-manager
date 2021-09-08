@@ -23,14 +23,15 @@ You can use the following environment variables to change its configuration:
 
 ```bash
 # Assuming you have only git repos under GitHub/hashicorp/ and GitHub/organization/, + a single repo GitHub/my-repo
-export PRECOMMIT_INCLUDE="*hashicorp/terraform*"
+export PRECOMMIT_INCLUDE="*organization/pre-commit-manager,*hashicorp/terraform"
 export PRECOMMIT_EXCLUDE="*hashicorp/*,*organization*,$HOME/Documents/GitHub/my-repo"
 ```
 
-Pre-Commit Manager will scan this list:
+Pre-Commit Manager will scan this list to deploy the hooks and the baseline config configured:
+
 ```
-$HOME/Documents/GitHub/hashicorp/terraform/.git
-$HOME/Documents/GitHub/my-repo
+$HOME/Documents/GitHub/hashicorp/terraform
+$HOME/Documents/GitHub/organization/pre-commit-manager
 ```
 
 ## Contents
