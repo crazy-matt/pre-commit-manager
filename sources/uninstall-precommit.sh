@@ -91,25 +91,37 @@ if [[ "${answer}" == "y" ]]; then
   fi
 
   repo_list="$(sort -u <(printf '%s\n' "${repo_exclusion_list}") <(printf '%s\n' "${repo_inclusion_list}"))"
+  # shellcheck disable=SC2207
+  repo_array=($(echo "${repo_list}" | tr ' ' ','))
+  total_count=${#repo_array[@]}
 
-  for repo in ${repo_list}; do
-    repo_path="${repo%/.git}"
-    echo -e "\033[1;32m[✓]\033[0m repo \033[1;34m${repo_path}\033[0m"
-    if [[ "${answer2}" == "y" ]]; then
-      if [[ -f "${repo_path}/.pre-commit-config.yaml" ]]; then
-        rm -f "${repo_path}/.pre-commit-config.yaml"
-        echo -e "   * pre-commit manager baseline config removed..."
+  final_answer=n
+  if [[ "$1" != "-q" ]]; then
+    read -r -p "About to remove pre-commit hooks from ${total_count} repos, do you want to proceed [y/N]: " final_answer
+  else
+    final_answer=y
+  fi
+
+  if [[ "${final_answer}" == "y" ]]; then
+    for repo in ${repo_list}; do
+      repo_path="${repo%/.git}"
+      echo -e "\033[1;32m[✓]\033[0m repo \033[1;34m${repo_path}\033[0m"
+      if [[ "${answer2}" == "y" ]]; then
+        if [[ -f "${repo_path}/.pre-commit-config.yaml" ]]; then
+          rm -f "${repo_path}/.pre-commit-config.yaml"
+          echo -e "   * pre-commit manager baseline config removed..."
+        fi
       fi
-    fi
-    if [[ -f "${repo_path}/.git/hooks/commit-msg" || -f "${repo_path}/.git/hooks/pre-commit" || -f "${repo_path}/.git/hooks/pre-push" ]]; then
-      cd "${repo_path}"
-      [[ -n "$(command -v pre-commit)" ]] && printf '%s\n' "   * $(pre-commit uninstall)" || true
-      rm "${repo_path}/.git/hooks/commit-msg" 2>/dev/null && echo -e "   * Hook commit-msg removed"
-      rm "${repo_path}/.git/hooks/pre-commit" 2>/dev/null && echo -e "   * Hook pre-commit removed"
-      rm "${repo_path}/.git/hooks/pre-push" 2>/dev/null && echo -e "   * Hook pre-push removed"
-      cd - &>/dev/null
-    fi
-  done
+      if [[ -f "${repo_path}/.git/hooks/commit-msg" || -f "${repo_path}/.git/hooks/pre-commit" || -f "${repo_path}/.git/hooks/pre-push" ]]; then
+        cd "${repo_path}"
+        [[ -n "$(command -v pre-commit)" ]] && printf '%s\n' "   * $(pre-commit uninstall)" || true
+        rm "${repo_path}/.git/hooks/commit-msg" 2>/dev/null && echo -e "   * Hook commit-msg removed"
+        rm "${repo_path}/.git/hooks/pre-commit" 2>/dev/null && echo -e "   * Hook pre-commit removed"
+        rm "${repo_path}/.git/hooks/pre-push" 2>/dev/null && echo -e "   * Hook pre-push removed"
+        cd - &>/dev/null
+      fi
+    done
+  fi
 fi
 
 # Clean out cached pre-commit files

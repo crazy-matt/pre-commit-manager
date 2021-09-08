@@ -126,13 +126,15 @@ fi
 
 repo_list="$(sort -u <(printf '%s\n' "${repo_exclusion_list}") <(printf '%s\n' "${repo_inclusion_list}"))"
 
-total_count=0
+repo_array=($(echo "${repo_list}" | tr ' ' ','))
+total_count=${#repo_array[@]}
+dynamic_total_count=0
 updated_count=0
 
 for repo in ${repo_list}; do
   repo_path="${repo%/.git}"
   change=false
-  ((total_count+=1))
+  ((dynamic_total_count+=1))
   echo -e "\033[1;32m[✓]\033[0m repo \033[1;34m${repo_path}\033[0m"
 
   if [[ -f "${repo_path}/.pre-commit-config.yaml" ]]; then
@@ -153,7 +155,7 @@ for repo in ${repo_list}; do
   fi
 
   # If nothing has been deployed already, then deploy 2 hooks: pre-push & commit-msg
-  if [[ ! -f "${repo_path}/.git/hook/pre-push" || ! -f "${repo_path}/.git/hook/commit-msg" ]]; then
+  if [[ ! -f "${repo_path}/.git/hooks/commit-msg" || ! -f "${repo_path}/.git/hooks/pre-commit" || ! -f "${repo_path}/.git/hooks/pre-push" ]]; then
     cd "${repo_path}"
     git config --unset-all core.hooksPath && echo -e "   * Reset of the git core.hooksPath variable..."
     printf '%s\n' "   * $(pre-commit install)"
@@ -167,7 +169,7 @@ for repo in ${repo_list}; do
     ((updated_count+=1))
   fi
 
-  echo -e "\033[1;33m   ${updated_count}/${total_count} repositories updated\033[0m"
+  echo -e "\033[1;33m   ${updated_count}/${dynamic_total_count}/${total_count} repositories updated\033[0m"
 done
 
 WITHOUT_INTERPOLATION
