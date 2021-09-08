@@ -71,7 +71,6 @@ jobs:
           WORKSPACE: ""
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOOLS_CONFIG_DIR: .security
-          SAST_SCAN_SRC_DIR: .security
           CODE_SNIPPET_MAX_LINES: 4
           #SCAN_DEBUG_MODE: debug
           #SKIP_INSIGHTS: false # for Python analysis
