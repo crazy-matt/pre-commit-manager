@@ -181,7 +181,7 @@ echo -e "\033[1;32m[✓]\033[0m Hooks deployer script created: ${installer_locat
 croncmd="/bin/bash '${installer_location}/deploy_hooks.sh'"
 cronjob="*/${cronjob_frequency_mins} * * * * ${croncmd}"
 if [[ -z "$(crontab -l | grep "${croncmd}")" ]]; then
-  ( crontab -l | grep -v -F "${croncmd}" ; echo -e "${cronjob}" ) | crontab -
+  (crontab -l || true | grep -v -F "${croncmd}"; echo -e "${cronjob}") | crontab -
   echo -e "\033[1;32m[✓]\033[0m Hooks deployer cron job created to be run every ${cronjob_frequency_mins} mins"
 fi
 
@@ -191,7 +191,7 @@ fi
 croncmd="pre-commit gc"
 cronjob="0 13 * * * ${croncmd}"
 if [[ -z "$(crontab -l | grep "${croncmd}")" ]]; then
-  ( crontab -l | grep -v -F "${croncmd}" ; echo -e "${cronjob}" ) | crontab -
+  (crontab -l || true | grep -v -F "${croncmd}"; echo -e "${cronjob}") | crontab -
   echo -e "\033[1;32m[✓]\033[0m pre-commit cache cleanup job deployed to be run every day at 13:00"
 fi
 
