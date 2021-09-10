@@ -61,7 +61,7 @@ jobs:
           echo "ref: ${{ github.ref }}""
           echo "base: ${{ github.base_ref }}"
           echo "head: ${{ github.head_ref }}"
-          echo "branch: $(git branch)"
+          git branch
           exit 1
           if [[ ${{ github.event_name }} == 'push' && ${{ github.ref }} == "refs/heads/${{ github.event.repository.default_branch }}" ]]; then
             echo "::set-output name=commmit_info:: [Push on Main]"
