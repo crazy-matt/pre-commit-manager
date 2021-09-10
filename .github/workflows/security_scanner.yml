@@ -51,9 +51,18 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          #token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          # TODO ^^ confirm
+
+
       - name: "Set ShiftLeft Scan Baseline against Default Branch"
         id: baseline_prep
         run: |
+          echo "ref: ${{ github.ref }}""
+          echo "base: ${{ github.base_ref }}"
+          echo "head: ${{ github.head_ref }}"
+          echo "branch: $(git branch)"
+          exit 1
           if [[ ${{ github.event_name }} == 'push' && ${{ github.ref }} == "refs/heads/${{ github.event.repository.default_branch }}" ]]; then
             echo "::set-output name=commmit_info:: [Push on Main]"
           fi
@@ -72,6 +81,14 @@ jobs:
           CODE_SNIPPET_MAX_LINES: 4
           #SCAN_DEBUG_MODE: debug
           #SKIP_INSIGHTS: false # for Python analysis
+
+      # - name: Temporarily disable "include administrators" branch protection
+      #   uses: benjefferies/branch-protection-bot@1.0.5
+      #   if: always()
+      #   with:
+      #     access-token: ${{ secrets.ACCESS_TOKEN }}
+      
+
       - name: "Update ShiftLeft Scan Baseline against Default Branch"
         id: baseline_update
         if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
@@ -82,7 +99,20 @@ jobs:
           cp -f .security/sast-reports/.sastscan.baseline .security/automated/.sastscan.baseline
           git add .security/automated/.sastscan.baseline
           git commit -m "Update ShiftLeft scan baseline"
-          git push
+          git push --no-verify
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+
+      # - name: Enable "include administrators" branch protection
+      #   uses: benjefferies/branch-protection-bot@master
+      #   if: always()  # Force to always run this step to ensure "include administrators" is always turned back on
+      #   with:
+      #     access-token: ${{ secrets.ACCESS_TOKEN }}
+      #     owner: benjefferies
+      #     repo: branch-protection-bot
+
+
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |
