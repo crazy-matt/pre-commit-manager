@@ -4,8 +4,8 @@ on:
   pull_request:
     types: [opened]
   push:
-    branches-ignore:
-      - 'main'
+    branches:
+      - 'pull/**'
 
 jobs:
   pr-labeler:
