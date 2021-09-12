@@ -64,6 +64,7 @@ $HOME/Documents/GitHub/organization/pre-commit-manager
 
 ```
 git clone git@github.com:crazy-matt/pre-commit-manager.git
+# git clone https://github.com/crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/install-precommit.sh
 ```
