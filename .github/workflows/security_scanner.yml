@@ -53,8 +53,6 @@ jobs:
   sast_scanner:
     name: "SAST Vulnerability Scanner"
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     outputs:
       matrix: ${{ steps.sarif_reports_matrix.outputs.matrix }}
     steps:
@@ -63,8 +61,6 @@ jobs:
           fetch-depth: 0
           #token: ${{ secrets.BOT_GITHUB_TOKEN }}
           # TODO ^^ confirm
-
-
       - name: "Set ShiftLeft Scan Baseline against Default Branch"
         id: baseline_prep
         run: |
@@ -86,13 +82,11 @@ jobs:
           CODE_SNIPPET_MAX_LINES: 4
           #SCAN_DEBUG_MODE: debug
           #SKIP_INSIGHTS: false # for Python analysis
-
-      # - name: Temporarily disable "include administrators" branch protection
-      #   uses: benjefferies/branch-protection-bot@1.0.5
-      #   if: always()
-      #   with:
-      #     access-token: ${{ secrets.ACCESS_TOKEN }}
-
+      - name: "Temporarily disable 'include administrators' branch protection"
+        uses: benjefferies/branch-protection-bot@1.0.5
+        if: always()
+        with:
+          access-token: ${{ secrets.PUSH_BACK_TOKEN }}
       - name: "Update ShiftLeft Scan Baseline against Default Branch"
         id: baseline_update
         if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
@@ -106,17 +100,13 @@ jobs:
           git push --no-verify
         # env:
         #   GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-
-      # - name: Enable "include administrators" branch protection
-      #   uses: benjefferies/branch-protection-bot@master
-      #   if: always()  # Force to always run this step to ensure "include administrators" is always turned back on
-      #   with:
-      #     access-token: ${{ secrets.ACCESS_TOKEN }}
-      #     owner: benjefferies
-      #     repo: branch-protection-bot
-
-
+      - name: "Re-enable 'include administrators' branch protection"
+        uses: benjefferies/branch-protection-bot@master
+        if: always()  # Force to always run this step to ensure "include administrators" is always turned back on
+        with:
+          access-token: ${{ secrets.PUSH_BACK_TOKEN }}
+          owner: benjefferies
+          repo: branch-protection-bot
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |
