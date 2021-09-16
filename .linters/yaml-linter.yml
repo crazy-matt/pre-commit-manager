@@ -25,9 +25,9 @@ rules:
     level: warning
     indent-sequences: consistent
   line-length:
-    ignore: |
-      .github/workflows/security_scanner.yml
+    # ignore: |
+    #   .github/workflows/security_scanner.yml
     level: warning
-    max: 150
+    max: 250
     allow-non-breakable-inline-mappings: true
   truthy: disable
