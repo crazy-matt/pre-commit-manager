@@ -106,7 +106,7 @@ jobs:
         # env:
         #   GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
       - name: "Restore 'include administrators' default branch protection"
-        uses: benjefferies/branch-protection-bot@1.0.5
+        uses: crazy-matt/branch-protection-bot@feature/output-current-admin-enabled
         if: always()  # Force to always run this step to ensure "include administrators" is always turned back on
         with:
           access-token: ${{ secrets.PUSH_BACK_TOKEN }}
