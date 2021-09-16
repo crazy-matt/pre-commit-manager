@@ -6,7 +6,7 @@ on:
     types: [opened]
   push:
     branches-ignore:
-      - refs/pull/**
+      - 'pull/**'
   workflow_dispatch:
 
 
