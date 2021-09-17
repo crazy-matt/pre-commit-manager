@@ -104,7 +104,7 @@ jobs:
           git_committer_email: "46377983+crazy-matt@users.noreply.github.com"
           gpg_private_key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.BOT_GPG_PASSPHRASE }}
-      - run: sleep 20 
+      - run: sleep 20
       - name: "Update ShiftLeft Scan Baseline against Default Branch"
         id: baseline_update
         if: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
