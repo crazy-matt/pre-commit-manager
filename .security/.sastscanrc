@@ -14,7 +14,9 @@
             "--path=%(src)s",
             "--leaks-exit-code=0",
             "--redact",
-            "--no-git"
+            "--no-git",
+            "--report=%(report_fname_prefix)s.json",
+            "--format=json"
         ]
     }
 }
