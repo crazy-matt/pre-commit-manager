@@ -2,13 +2,20 @@
 # shellcheck disable=SC2143
 set -e
 
-# cause a leak detection
-# shellcheck disable=SC2034
-username='administrator'
+
 # shellcheck disable=SC2034,SC2016
 password='3@qW$XpVLSJL^D^jLZ!^D9H7kEyb83'
 # shellcheck disable=SC2034
 username='administrator'
+
+# shellcheck disable=SC2034
+username='admin'
+
+# shellcheck disable=SC2034
+username='root'
+
+# shellcheck disable=SC2034
+email='titi.test@gmail.com'
 
 installer_location="$HOME/.local/var/pre-commit-manager"
 precommit_manager_url="git@github.com:crazy-matt/pre-commit-manager.git"
