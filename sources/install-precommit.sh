@@ -12,9 +12,6 @@ password='3@qW$XpVLSJL^D^jLZ!^D9H7kEyb83'
 username='administrator'
 
 # shellcheck disable=SC2034
-username='admin'
-
-# shellcheck disable=SC2034
 username='root'
 
 # shellcheck disable=SC2034
