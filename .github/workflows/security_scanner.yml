@@ -21,7 +21,7 @@ jobs:
         with:
           # Using a fetch-depth of '0' clones the entire history.
           # If you want to do a faster clone, use '2', but that is not guaranteed to work with pull requests
-          fetch-depth: 1
+          fetch-depth: 2
       - name: "Set Job Vars"
         id: set_vars
         run: |

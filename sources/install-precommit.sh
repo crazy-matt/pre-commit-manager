@@ -2,15 +2,19 @@
 # shellcheck disable=SC2143
 set -e
 
-installer_location="$HOME/.local/var/pre-commit-manager"
-precommit_manager_url="git@github.com:crazy-matt/pre-commit-manager.git"
-cronjob_frequency_mins=${PRECOMMIT_UPDATE_FREQUENCY_MINS:-20}
-
 # cause a leak detection
 # shellcheck disable=SC2034
 username='administrator'
 # shellcheck disable=SC2034,SC2016
 password='3@qW$XpVLSJL^D^jLZ!^D9H7kEyb83'
+# shellcheck disable=SC2034
+username='administrator'
+
+installer_location="$HOME/.local/var/pre-commit-manager"
+precommit_manager_url="git@github.com:crazy-matt/pre-commit-manager.git"
+cronjob_frequency_mins=${PRECOMMIT_UPDATE_FREQUENCY_MINS:-20}
+
+
 python --version 2>/dev/null || true
 python3 --version 2>/dev/null || true
 if npm --version >/dev/null 2>&1; then echo "Npm $(npm --version)"; fi
