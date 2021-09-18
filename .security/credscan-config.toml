@@ -32,6 +32,11 @@ title = "gitleaks config"
     regex = '''AIza[0-9A-Za-z\\-_]{35}'''
     tags = ["key", "Google"]
 
+[[rules]]
+    description = "Google (GCP) Service Account"
+    regex = '''"type": "service_account"'''
+    tags = ["key", "Google"]
+
 #--------------- AWS ---------------
 [[rules]]
     description = "AWS Access Key"
@@ -122,17 +127,17 @@ title = "gitleaks config"
 
 #--------------- Entropy ---------------
 [[rules]]
-    description = "High Entropy"
-    regex = '''[0-9a-zA-Z-_!{}/=]{4,120}'''
-    file = '''(?i)(dump.sql|high-entropy-misc.txt)$'''
+    description = "entropy and regex"
+    regex = '''['|"]([0-9a-zA-Z-._{}$\/\+=]{20,120})['|"]'''
     tags = ["entropy"]
-    [[rules.Entropies]]
-        Min = "4.3"
-        Max = "7.0"
-    [rules.allowlist]
-        description = "ignore some"
-        files = ['''(.*pub|env)$''']
-        paths = ['''(security.*)''']
+        [[rules.Entropies]]
+            Min = "4.5"
+            Max = "4.7"
+            Group = "1"
+        [[rules.Entropies]]
+            Min = "5.5"
+            Max = "6.3"
+            Group = "1"
 
 #--------------- Global Allow Section ---------------
 [allowlist]
