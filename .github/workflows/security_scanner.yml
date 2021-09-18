@@ -69,7 +69,7 @@ jobs:
         with:
           output: .security/sast-reports
         env:
-          WORKSPACE: ${{ github.workspace }}
+          #WORKSPACE: ${{ github.workspace }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SAST_SCAN_SRC_DIR: .security
           TOOLS_CONFIG_DIR: .security
