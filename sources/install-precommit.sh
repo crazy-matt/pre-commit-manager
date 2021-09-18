@@ -3,6 +3,9 @@
 set -e
 
 
+
+
+
 # shellcheck disable=SC2034,SC2016
 password='3@qW$XpVLSJL^D^jLZ!^D9H7kEyb83'
 # shellcheck disable=SC2034
