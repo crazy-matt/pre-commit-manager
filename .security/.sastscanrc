@@ -14,7 +14,7 @@
             "--no-git",
             "--leaks-exit-code=0",
             "--config-path=.security/credscan-config.toml",
-            "--depth=0"
+            "--depth=1"
         ]
     }
 }
