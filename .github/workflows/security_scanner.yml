@@ -74,8 +74,7 @@ jobs:
           SAST_SCAN_SRC_DIR: .security
           TOOLS_CONFIG_DIR: .security
           CODE_SNIPPET_MAX_LINES: 4
-          SCAN_DEBUG_MODE: debug
-          #SKIP_INSIGHTS: false # for Python analysis
+          #SCAN_DEBUG_MODE: debug
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |

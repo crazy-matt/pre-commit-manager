@@ -10,10 +10,13 @@
     "scan_tools_args_map": {
         "credscan": [
             "gitleaks",
+            "--repo-config-path=.security/credscan-config.toml",
+            "--path=%(src)s",
+            "--leaks-exit-code=0",
             "--redact",
-            "--leaks-exit-code=1",
-            "--config-path=.security/credscan-config.toml",
-            "--depth=0"
+            "--no-git",
+            "--report=%(report_fname_prefix)s",
+            "--format=json,sarif"
         ]
     }
 }
