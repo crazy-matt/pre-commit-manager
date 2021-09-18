@@ -11,7 +11,7 @@
         "credscan": [
             "gitleaks",
             "--redact",
-            "--leaks-exit-code=0",
+            "--leaks-exit-code=1",
             "--config-path=.security/credscan-config.toml",
             "--depth=0"
         ]
