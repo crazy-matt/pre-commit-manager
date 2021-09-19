@@ -14,7 +14,8 @@
             "--path=/github/workspace",
             "--leaks-exit-code=0",
             "--redact",
-            "--no-git"
+            "--no-git",
+            "--format=json"
         ]
     }
 }
