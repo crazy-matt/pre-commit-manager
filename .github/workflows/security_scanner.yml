@@ -69,7 +69,7 @@ jobs:
         with:
           output: .security/sast-reports
         env:
-          #WORKSPACE: ${{ github.workspace }}
+          WORKSPACE: ""
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SAST_SCAN_SRC_DIR: .security
           TOOLS_CONFIG_DIR: .security
@@ -78,7 +78,7 @@ jobs:
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |
-          ls -lna .security/sast-reports
+          ls -lna .security/sast-reports #TODO: remove this line
           echo " ===> Building the matrix of available SARIF reports:"
           # yamllint disable
           json_array="{ \"include\":$(ls .security/sast-reports/*.sarif | jq -s -R -c 'split("\n") | to_entries | map( {"report_name": (.value |= (sub("^.security/sast-reports/"; ""))).value, "report_path": (.value)} )'[:-1])}"

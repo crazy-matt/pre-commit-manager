@@ -10,8 +10,8 @@
     "scan_tools_args_map": {
         "credscan": [
             "gitleaks",
-            "--repo-config-path=%(credscan_config)s",
-            "--path=%(src)s",
+            "--repo-config-path=.security/credscan-config.toml",
+            "--path=/github/workspace",
             "--leaks-exit-code=0",
             "--redact",
             "--no-git"
