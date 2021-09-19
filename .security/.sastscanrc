@@ -15,8 +15,7 @@
             "--leaks-exit-code=0",
             "--redact",
             "--no-git",
-            "--format=json",
-            "--depth=0"
+            "--format=json"
         ]
     }
 }
