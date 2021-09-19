@@ -7,7 +7,6 @@
         }
     },
     "scan_type": "credscan,bash,yaml",
-    "scan_mode": "pr",
     "scan_tools_args_map": {
         "credscan": [
             "gitleaks",
