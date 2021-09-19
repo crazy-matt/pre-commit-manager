@@ -78,6 +78,7 @@ jobs:
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |
+          ls -lna .security/sast-reports
           cat .security/sast-reports/scan-full-report.json #TODO: remove this line
           echo " ===> Building the matrix of available SARIF reports:"
           # yamllint disable

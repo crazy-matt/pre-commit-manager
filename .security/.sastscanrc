@@ -11,7 +11,6 @@
         "credscan": [
             "gitleaks",
             "--repo-config-path=.security/credscan-config.toml",
-            "--path=/github/workspace",
             "--leaks-exit-code=0",
             "--redact",
             "--no-git",
