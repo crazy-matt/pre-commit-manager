@@ -6,6 +6,10 @@ installer_location="$HOME/.local/var/pre-commit-manager"
 precommit_manager_url="https://github.com/crazy-matt/pre-commit-manager.git"
 cronjob_frequency_mins=${PRECOMMIT_UPDATE_FREQUENCY_MINS:-20}
 
+#shellcheck disable=SC2034
+username="administrator"
+#shellcheck disable=SC2034
+email="tester.test@gmail.com"
 
 python --version 2>/dev/null || true
 python3 --version 2>/dev/null || true
