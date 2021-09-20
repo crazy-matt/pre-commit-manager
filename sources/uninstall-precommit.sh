@@ -38,12 +38,64 @@ else
 fi
 
 if [[ "${answer}" == "y" ]]; then
-  repo_list=$(eval "find $HOME -type d -not \( -path '/Users/${USER}/Library' -prune \
-    -o -path '/Users/${USER}/Pictures' -prune \
-    -o -path '/Users/${USER}/.*' -prune \
-    -o -path '*.terraform/*' -prune \
-    -o -path '*.terragrunt-cache/*' -prune \
-    -o -path '*.history/*' -prune \) -iname '.git' -prune")
+  if [[ -n "${PRECOMMIT_EXCLUDE}" || -n "${PRECOMMIT_INCLUDE}" ]]; then
+    echo -e "\033[1;37m\033[41mMake sure to empty your environment variales '\$PRECOMMIT_EXCLUDE' and '\$PRECOMMIT_INCLUDE' if you want to cleanup ALL repositories\033[0m"
+  fi
+
+  # Build the find parameters to exclude/include any folders declared in the bash environment
+  custom_exclusion_filter=""
+  # shellcheck disable=SC2153
+  for pattern in ${PRECOMMIT_EXCLUDE//,/ }; do
+    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
+      pattern="${pattern}*"
+    fi
+    custom_exclusion_filter="$custom_exclusion_filter -o -path '$pattern' -prune"
+  done
+
+  custom_inclusion_filter=""
+  # shellcheck disable=SC2153
+  for pattern in ${PRECOMMIT_INCLUDE//,/ }; do
+    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
+      pattern="${pattern}*"
+    fi
+    if [[ "${custom_inclusion_filter}" == "" ]]; then
+      custom_inclusion_filter="-path '$pattern'"
+    else
+      custom_inclusion_filter="$custom_inclusion_filter -o -path '$pattern'"
+    fi
+  done
+
+  # Build the git repo list located on the hard drive under the HOME directory
+  repo_exclusion_list=$(eval "find $HOME -type d \
+    -not \( \
+      -path '${HOME}/Library' -prune \
+      -o -path '${HOME}/Pictures' -prune \
+      -o -path '${HOME}/.*' -prune \
+      -o -path '*.terraform/*' -prune \
+      -o -path '*.terragrunt-cache/*' -prune \
+      -o -path '*.history/*' -prune \
+      ${custom_exclusion_filter} \
+    \) \
+    -iname '.git' -prune" \
+  )
+
+  # shellcheck disable=SC2153
+  if [[ -n "${PRECOMMIT_INCLUDE}" ]]; then
+    repo_inclusion_list=$(eval "find $HOME -type d \
+      -not \( \
+        -path '${HOME}/Library' -prune \
+        -o -path '${HOME}/Pictures' -prune \
+        -o -path '${HOME}/.*' -prune \
+        -o -path '*.terraform/*' -prune \
+        -o -path '*.terragrunt-cache/*' -prune \
+        -o -path '*.history/*' -prune \
+      \) \
+      \( ${custom_inclusion_filter} \) \
+      -iname '.git' -prune" \
+    )
+  fi
+
+  repo_list="$(sort -u <(printf '%s\n' "${repo_exclusion_list}") <(printf '%s\n' "${repo_inclusion_list}"))"
 
   for repo in ${repo_list}; do
     repo_path="${repo%/.git}"
