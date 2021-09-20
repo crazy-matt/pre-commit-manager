@@ -3,7 +3,7 @@
 set -e
 
 installer_location="$HOME/.local/var/pre-commit-manager"
-precommit_manager_url="git@github.com:crazy-matt/pre-commit-manager.git"
+precommit_manager_url="https://github.com/crazy-matt/pre-commit-manager.git"
 cronjob_frequency_mins=${PRECOMMIT_UPDATE_FREQUENCY_MINS:-20}
 
 

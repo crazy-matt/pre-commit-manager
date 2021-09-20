@@ -63,8 +63,7 @@ $HOME/Documents/GitHub/organization/pre-commit-manager
 :metal: Just run:
 
 ```
-git clone git@github.com:crazy-matt/pre-commit-manager.git
-# git clone https://github.com/crazy-matt/pre-commit-manager.git
+git clone https://github.com/crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/install-precommit.sh
 ```
@@ -87,20 +86,22 @@ Pre-Commit can also be run in your CI/CD pipeline. The same hooks you use locall
 ```
 .
 ├── .gitignore
-├── .pre-commit-config.yaml.yaml        => Hooks configured for this repo
-├── .pre-commit-hooks.yaml              => Index of the Pre-Commit custom hooks offered by Pre-Commit Manager
-├── detect-unencrypted-ansible-vault.sh => Hook for unencrypted Ansible vaults detection
-├── detect-unsigned-commit.sh           => Hook for unsigned commits detection
-├── sources                             => Manager sources
-│   ├── collection                      => A list of configuration examples that can be used to manually update your .pre-commit-config.yaml
+├── .pre-commit-config.yaml.yaml            => Hooks configured for this repo
+├── .pre-commit-hooks.yaml                  => Index of the Pre-Commit hooks offered by Pre-Commit Manager
+├── pre-commit-hooks                        => Hooks offered by Pre-Commit Manager
+│   ├── detect-unsigned-commit.sh           => Hook for unsigned commits detection
+│   ├── detect-unencrypted-ansible-vault.sh => Hook for unencrypted Ansible vaults detection
+│   ├── terragrunt-validate.sh              => Hook running 'terragrunt validate-inputs' and 'terragrunt validate'
+├── sources                                 => Manager sources
+│   ├── collection                          => A list of configuration examples that can be used to manually update your .pre-commit-config.yaml
 │   │   ├── aws.yaml
 │   │   ├── docker.yaml
 │   │   ├── markdown.yaml
 │   │   ├── shell.yaml
 │   │   └── terraform.yaml
-│   ├── baseline.yaml                   => Pre-Commit configuration being deployed automatically in its latest release in your repositories
-│   ├── install-precommit.sh            => Installtion script of Pre-Commit Manager
-│   └── uninstall-precommit.sh          => Uninstalltion script of Pre-Commit Manager
+│   ├── baseline.yaml                       => Pre-Commit configuration being deployed automatically in its latest release in your repositories
+│   ├── install-precommit.sh                => Installtion script of Pre-Commit Manager
+│   └── uninstall-precommit.sh              => Uninstalltion script of Pre-Commit Manager
 └── README.md
 ```
 
@@ -181,7 +182,7 @@ pre-commit clean
 You will be guided by the uninstallation script `sources/uninstall-precommit.sh`.
 
 ```
-git clone git@github.com:crazy-matt/pre-commit-manager.git
+git clone https://github.com/crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/uninstall-precommit.sh
 # or
