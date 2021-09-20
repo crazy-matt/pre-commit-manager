@@ -8,35 +8,38 @@
 Pre-Commit Manager installs for you [Pre-Commit](http://pre-commit.com), a Git hooks configuration framework that helps you to push pre-validated code only.
 
 With Pre-Commit, you traditionally need to install the hooks and deploy a configuration each time you create a new repository.
-This Pre-Commit Manager does everything for you using the baseline configuration file of your choice and can scan your disk to update the new repositories being added as often as you want.
+This Pre-Commit Manager does everything for you using the baseline configuration file of your choice and scans your disk to update the new repositories being added as often as you want.
 
 You can use the following environment variables to change its configuration:
 
-- `PRECOMMIT_UPDATE_FREQUENCY_MINS`, the frequency of scan in minutes (default: 20)
-- `PRECOMMIT_BASELINE`, the baseline configuration being injected in your repositories (default: sources/baseline.yaml)
-- `PRECOMMIT_EXCLUDE`, a list of paths you want to exclude from the scans:
+| Variable | Description |
+| --- | --- |
+| `$PRECOMMIT_UPDATE_FREQUENCY_MINS` | The frequency of scans in minutes (default: 20). Needs to be defined pre-installation, or can be modified post-installation in your crontab. |
+| `$PRECOMMIT_BASELINE` | The baseline configuration being injected in your repositories (default: sources/baseline.yaml) |
+| `$PRECOMMIT_INCLUDE` | a list of paths **under the $HOME folder** that you want to include in the directory scans (supports wildcard patterns) |
+| `$PRECOMMIT_EXCLUDE` | a list of paths **under the $HOME folder** that you want to exclude from the directory scans (supports wildcard patterns) |
+
+`$PRECOMMIT_INCLUDE` take precedence over `$PRECOMMIT_EXCLUDE`, meaning you can overlap as below:
 
 ```bash
-export PRECOMMIT_EXCLUDE="*cloudposse/*,$HOME/Documents/GitHub/my-repo"
-# ^^ will exclude any repo which the path contains 'cloudposse' and also the repo '$HOME/Documents/GitHub/my-repo'
+# Assuming you have only git repos under GitHub/hashicorp/ and GitHub/organization/, + a single repo GitHub/my-repo
+export PRECOMMIT_INCLUDE="*organization/pre-commit-manager,*hashicorp/terraform"
+export PRECOMMIT_EXCLUDE="*hashicorp/*,*organization*,$HOME/Documents/GitHub/my-repo"
 ```
 
-This approach relies on systematic ways of:
+Pre-Commit Manager will scan this list to deploy the hooks and the baseline config configured:
 
-- preventing non-approved code from entering the code base,
-- detecting if such preventions are explicitly bypassed.
-
-This way, you create a separation of concern: accepting that there may currently be non-compliant code in your large repositories, but preventing this issue from getting any larger.
-
-The Manager baseline Pre-Commit configuration can be extended to any kind of control you would like to set up, granularly per repo, and in any language of your choice as Pre-Commit is a multi-language hooks manager.
-
-Pre-Commit can also be run in your CI/CD pipeline. The same hooks you use locally can be run server-side, see [pre-commit run](https://pre-commit.com/#pre-commit-run).
+```
+$HOME/Documents/GitHub/hashicorp/terraform
+$HOME/Documents/GitHub/organization/pre-commit-manager
+```
 
 ## Contents
 
 - [Pre-Commit Manager](#pre-commit-manager)
   - [Contents](#contents)
   - [Quickstart](#quickstart)
+  - [Security Fundamentals](#security-fundamentals)
   - [Repository Description](#repository-description)
   - [Installation](#installation)
     - [Requirements](#requirements)
@@ -61,21 +64,38 @@ Pre-Commit can also be run in your CI/CD pipeline. The same hooks you use locall
 
 ```
 git clone git@github.com:crazy-matt/pre-commit-manager.git
+# git clone https://github.com/crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/install-precommit.sh
 ```
+
+## Security Fundamentals
+
+The Pre-Commit usage approach relies on systematic ways of:
+
+- preventing non-approved code from entering the code base,
+- detecting if such preventions are explicitly bypassed.
+
+This way, you create a separation of concern: accepting that there may currently be non-compliant code in your large repositories, but preventing this issue from getting any larger.
+
+The Manager baseline Pre-Commit configuration can be extended to any kind of control you would like to set up, granularly per repo, and in any language of your choice as Pre-Commit is a multi-language hooks manager.
+
+Pre-Commit can also be run in your CI/CD pipeline. The same hooks you use locally can be run server-side, see [pre-commit run](https://pre-commit.com/#pre-commit-run).
 
 ## Repository Description
 
 ```
 .
 ├── .gitignore
-├── .pre-commit-hooks.yaml              => Index of the Pre-commit custom hooks offered by Pre-Commit Manager
+├── .pre-commit-config.yaml.yaml        => Hooks configured for this repo
+├── .pre-commit-hooks.yaml              => Index of the Pre-Commit custom hooks offered by Pre-Commit Manager
 ├── detect-unencrypted-ansible-vault.sh => Hook for unencrypted Ansible vaults detection
 ├── detect-unsigned-commit.sh           => Hook for unsigned commits detection
 ├── sources                             => Manager sources
 │   ├── collection                      => A list of configuration examples that can be used to manually update your .pre-commit-config.yaml
 │   │   ├── aws.yaml
+│   │   ├── docker.yaml
+│   │   ├── markdown.yaml
 │   │   ├── shell.yaml
 │   │   └── terraform.yaml
 │   ├── baseline.yaml                   => Pre-Commit configuration being deployed automatically in its latest release in your repositories
@@ -164,6 +184,8 @@ You will be guided by the uninstallation script `sources/uninstall-precommit.sh`
 git clone git@github.com:crazy-matt/pre-commit-manager.git
 cd pre-commit-manager
 ./sources/uninstall-precommit.sh
+# or
+./sources/uninstall-precommit.sh -q # to get rid off everything in one shot
 ```
 
 ## Maintenance

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2143
+# shellcheck disable=SC2143,SC2015
 set -e
 
 installer_location="$HOME/.local/var/pre-commit-manager"
 
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit hooks deployer cron jobs [y/N]: ' answer
 else
   answer=y
@@ -14,7 +14,7 @@ fi
 
 if [[ "${answer}" == "y" ]]; then
   # Delete the 1st job definition
-  croncmd="/bin/bash '${installer_location}/deploy_hooks.sh'"
+  croncmd="/bin/bash -l -c '${installer_location}/deploy_hooks.sh'"
   if [[ -n "$(crontab -l | grep "$croncmd")" ]]; then
     ( crontab -l | grep -v -F "$croncmd" ) | crontab -
     echo -e "\033[1;32m[✓]\033[0m Hooks deployer cron job removed"
@@ -30,7 +30,7 @@ fi
 
 
 answer=n; answer2=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit hooks from all your repositories [y/N]: ' answer
   read -r -p 'Do you also want to remove all pre-commit baseline configs (.yaml) [y/N]: ' answer2
 else
@@ -46,18 +46,13 @@ if [[ "${answer}" == "y" ]]; then
   custom_exclusion_filter=""
   # shellcheck disable=SC2153
   for pattern in ${PRECOMMIT_EXCLUDE//,/ }; do
-    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-      pattern="${pattern}*"
-    fi
     custom_exclusion_filter="$custom_exclusion_filter -o -path '$pattern' -prune"
   done
 
   custom_inclusion_filter=""
   # shellcheck disable=SC2153
   for pattern in ${PRECOMMIT_INCLUDE//,/ }; do
-    if [[ ! -d "${pattern}" ]] && [[ "${pattern: -1}" != '*' ]]; then
-      pattern="${pattern}*"
-    fi
+    pattern="${pattern}/.git"
     if [[ "${custom_inclusion_filter}" == "" ]]; then
       custom_inclusion_filter="-path '$pattern'"
     else
@@ -91,72 +86,65 @@ if [[ "${answer}" == "y" ]]; then
         -o -path '*.history/*' -prune \
       \) \
       \( ${custom_inclusion_filter} \) \
-      -iname '.git' -prune" \
+      -prune" \
     )
   fi
 
   repo_list="$(sort -u <(printf '%s\n' "${repo_exclusion_list}") <(printf '%s\n' "${repo_inclusion_list}"))"
+  # shellcheck disable=SC2207
+  repo_array=($(echo "${repo_list}" | tr ' ' ','))
+  total_count=${#repo_array[@]}
 
-  for repo in ${repo_list}; do
-    repo_path="${repo%/.git}"
-    if [[ "${answer2}" == "y" ]]; then
-      rm -f "${repo_path}/.pre-commit-config.yaml"
-      echo -e "\033[1;32m[✓]\033[0m pre-commit baseline config removed from repo \033[1;34m${repo_path}\033[0m"
-    fi
-    if [[ -f "${repo_path}/.git/hook/pre-push" || -f "${repo_path}/.git/hook/commit-msg" ]]; then
-      cd "${repo_path}"
-      pre-commit uninstall >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/pre-push" >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/pre-commit" >/dev/null 2>&1
-      rm -f "${repo_path}/.git/hooks/commit-msg" >/dev/null 2>&1
-      echo -e "\033[1;32m[✓]\033[0m pre-commit hooks removed from repo \033[1;34m${repo_path}\033[0m"
-      cd - &>/dev/null
-    fi
-  done
+  final_answer=n
+  if [[ "$1" != "-q" ]]; then
+    read -r -p "About to remove pre-commit hooks from ${total_count} repos, do you want to proceed [y/N]: " final_answer
+  else
+    final_answer=y
+  fi
+
+  if [[ "${final_answer}" == "y" ]]; then
+    for repo in ${repo_list}; do
+      repo_path="${repo%/.git}"
+      echo -e "\033[1;32m[✓]\033[0m repo \033[1;34m${repo_path}\033[0m"
+      if [[ "${answer2}" == "y" ]]; then
+        if [[ -f "${repo_path}/.pre-commit-config.yaml" ]]; then
+          rm -f "${repo_path}/.pre-commit-config.yaml"
+          echo -e "   * pre-commit manager baseline config removed..."
+        fi
+      fi
+      if [[ -f "${repo_path}/.git/hooks/commit-msg" || -f "${repo_path}/.git/hooks/pre-commit" || -f "${repo_path}/.git/hooks/pre-push" ]]; then
+        cd "${repo_path}"
+        [[ -n "$(command -v pre-commit)" ]] && printf '%s\n' "   * $(pre-commit uninstall)" || true
+        rm "${repo_path}/.git/hooks/commit-msg" 2>/dev/null && echo -e "   * Hook commit-msg removed"
+        rm "${repo_path}/.git/hooks/pre-commit" 2>/dev/null && echo -e "   * Hook pre-commit removed"
+        rm "${repo_path}/.git/hooks/pre-push" 2>/dev/null && echo -e "   * Hook pre-push removed"
+        cd - &>/dev/null
+      fi
+    done
+  fi
 fi
 
 # Clean out cached pre-commit files
-pre-commit clean
+[[ -n "$(command -v pre-commit)" ]] && pre-commit clean || true
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to uninstall the pre-commit framework binaries (pre-commit itself) [y/N]: ' answer
 else
   answer=y
 fi
 
 if [[ "${answer}" == "y" ]]; then
-  uname_out=$(uname -s)
-  case ${uname_out} in
-    Linux*)     MACHINE=linux;;
-    Darwin*)    MACHINE=darwin;;
-    *)          MACHINE="UNKNOWN:${uname_out}";;
-  esac;
-  
-  if [[ "${MACHINE}" == "darwin" ]]; then
-    brew uninstall pre-commit
-  elif [[ "${MACHINE}" == "linux" ]]; then
-    [[ -n "$(command -v yum)" ]] && MACHINE=redhat
-    [[ -n "$(command -v apt-get)" ]] && MACHINE=debian
-    
-    if [[ "${MACHINE}" == "redhat" ]]; then
-      yum remove pre-commit
-    elif [[ "${MACHINE}" == "debian" ]]; then
-      apt-get remove pre-commit
-    else
-      echo -e "ERROR - OS unsupported"
-      exit 1
-    fi
+  if python -m pip uninstall pre-commit 2>/dev/null || python3 -m pip uninstall pre-commit 2>/dev/null || npm uninstall -g pre-commit 2>/dev/null; then
+    echo -e "\033[1;32m[✓]\033[0m pre-commit framework binaries removed"
   else
-    echo -e "ERROR - OS unsupported"
-    exit 1
+    echo -e "\033[1;37m\033[41mNo relevant package manager found. You will need to install python+pip or npm to uninstall pre-commit.\033[0m"
   fi
-  echo -e "\033[1;32m[✓]\033[0m pre-commit framework binaries uninstalled"
 fi
 
 
 answer=n
-if [[ "$1" != "y" ]]; then
+if [[ "$1" != "-q" ]]; then
   read -r -p 'Do you want to remove the pre-commit manager sources [y/N]: ' answer
 else
   answer=y
