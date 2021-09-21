@@ -66,14 +66,15 @@ jobs:
       - name: "SAST: ShiftLeftScan.io Scan"
         id: shiftleft_scan
         uses: ShiftLeftSecurity/scan-action@master
+        #uses: ShiftLeftSecurity/scan-action@v2.0.3
         with:
           output: .security/sast-reports
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SAST_SCAN_SRC_DIR: .security
-          TOOLS_CONFIG_DIR: ${{ github.workspace }}/.security
-          CODE_SNIPPET_MAX_LINES: 4
-          SCAN_DEBUG_MODE: debug
+          # SAST_SCAN_SRC_DIR: .security
+          # TOOLS_CONFIG_DIR: ${{ github.workspace }}/.security
+          # CODE_SNIPPET_MAX_LINES: 4
+          # SCAN_DEBUG_MODE: debug
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
         run: |
