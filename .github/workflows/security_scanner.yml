@@ -63,6 +63,7 @@ jobs:
           if [[ ${{ github.event_name }} == 'push' && ${{ github.ref }} == "refs/heads/${{ github.event.repository.default_branch }}" ]]; then
             echo "::set-output name=commmit_info:: [Push on Main]"
           fi
+          ls -lna ${{ github.workspace }}
       - name: "SAST: ShiftLeftScan.io Scan"
         id: shiftleft_scan
         #uses: ShiftLeftSecurity/scan-action@master
@@ -71,9 +72,9 @@ jobs:
           output: .security/sast-reports
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SAST_SCAN_SRC_DIR: ${{ github.workspace }}/.security
+          #SAST_SCAN_SRC_DIR: ${{ github.workspace }}/.security
           TOOLS_CONFIG_DIR: ${{ github.workspace }}/.security
-          # CODE_SNIPPET_MAX_LINES: 4
+          CODE_SNIPPET_MAX_LINES: 4
           SCAN_DEBUG_MODE: debug
       - name: "Build the report matrix and report defect"
         id: sarif_reports_matrix
