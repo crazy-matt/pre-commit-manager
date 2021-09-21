@@ -13,7 +13,8 @@
             "--repo-config-path=.security/credscan-config.toml",
             "--path=%(src)s",
             "--leaks-exit-code=0",
-            "--redact"
+            "--redact",
+            "--format=json"
         ]
     }
 }
