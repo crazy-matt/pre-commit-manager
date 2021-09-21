@@ -65,8 +65,8 @@ jobs:
           fi
       - name: "SAST: ShiftLeftScan.io Scan"
         id: shiftleft_scan
-        uses: ShiftLeftSecurity/scan-action@master
-        #uses: ShiftLeftSecurity/scan-action@v2.0.3
+        #uses: ShiftLeftSecurity/scan-action@master
+        uses: ShiftLeftSecurity/scan-action@v2.0.3
         with:
           output: .security/sast-reports
         env:
