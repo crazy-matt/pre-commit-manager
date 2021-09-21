@@ -87,9 +87,12 @@ jobs:
           if [[ ! -f ".security/sast-reports/ngsast-report.findings.json" ]] || \
             [[ -z "$(cat ".security/sast-reports/ngsast-report.findings.json" | jq '.findings[]')" ]]; then
               echo "::set-output name=defect::false"
+              echo "DEBUG ---> false"
           else
             echo "::set-output name=defect::true"
+            echo "DEBUG ---> true"
           fi
+          cat ".security/sast-reports/ngsast-report.findings.json"
       - name: "Upload ShiftLeft Scan Reports as Artifacts"
         if: steps.sarif_reports_matrix.outputs.defect == 'true'
         uses: actions/upload-artifact@v2.2.4
