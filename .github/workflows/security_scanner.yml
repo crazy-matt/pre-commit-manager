@@ -118,7 +118,7 @@ jobs:
     name: "SAST SARIF Reports Uploader"
     runs-on: ubuntu-latest
     needs: [sast_scanner]
-    if: always() && needs.sast_scanner.outputs.defect
+    if: needs.sast_scanner.outputs.defect == 'true'
     strategy:
       fail-fast: true
       matrix: ${{ fromJson(needs.sast_scanner.outputs.matrix) }}
