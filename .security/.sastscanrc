@@ -14,6 +14,7 @@
             "--path=%(src)s",
             "--leaks-exit-code=0",
             "--redact",
+            "--no-git",
             "--format=json"
         ]
     }
