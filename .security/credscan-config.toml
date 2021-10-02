@@ -95,7 +95,6 @@ title = "gitleaks config"
             '''git@gitlab.com''',
             '''(.*)Copyright(.*)''',
             '''(.*)Co-authored-by:(.*)''',
-            '''(.*)group:(.*)@cathex.io(.*)''',
             '''(.*)serviceAccount:(.*)gserviceaccount.com(.*)''',
             '''(.*)# scan:ignore''',
         ]
