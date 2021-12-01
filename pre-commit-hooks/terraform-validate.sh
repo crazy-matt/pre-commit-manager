@@ -27,7 +27,7 @@ _run_hook() {
     for excluded_path in "${EXCLUDED_PATHS[@]}"; do
       if [[ "${folder}" =~ ${excluded_path} ]]; then
         is_excluded=true
-        continue
+        break
       fi
     done
 
@@ -55,9 +55,9 @@ _run_hook() {
       set -e
 
       if [[ $validate_code != 0 ]]; then
-        if [[ "$validate_output" == *"Plugin reinitialization required"* ]]; then
+        if [[ "$validate_output" == *"Plugin reinitialization required"* || "$validate_output" == *"Module not installed"* || "$validate_output" == *"Module source has changed"* ]]; then
           set +e
-          # Retry mechanism to modules
+          # Retry mechanism
           init_output=$(terraform init -backend=false 2>&1)
           init_code=$?
           validate_output=$(terraform validate "${ARGS[*]}" 2>&1)
@@ -71,6 +71,18 @@ _run_hook() {
           echo
         fi
       fi
+
+      set +e
+      validate_output=$(tflint --enable-rule=terraform_unused_declarations 2>&1)
+      validate_code=$?
+      set -e
+      if [[ $validate_code != 0 ]]; then
+        error=1
+        echo "Terraform declaration validation failed for $folder"
+        echo "$validate_output"
+        echo
+      fi
+
       popd > /dev/null
 
     fi
