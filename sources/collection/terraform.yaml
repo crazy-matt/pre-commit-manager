@@ -26,7 +26,7 @@ repos:
     args: ['--exclude-lines', '(.*)# scan:ignore']
 
 - repo: https://github.com/crazy-matt/pre-commit-manager
-  rev: 1.1.0
+  rev: 1.2.0
   hooks:
   - id: terragrunt-fmt
     files: 'folders/.*(.hcl)'
