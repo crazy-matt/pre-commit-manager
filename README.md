@@ -251,3 +251,7 @@ Eventually check out these ones:
 
 :bulb: :question: :boom:
 If you want to share an issue or question :point_right: [create a GitHub issue](https://github.com/crazy-matt/pre-commit-manager/issues)
+
+## License
+
+Licensed under the [Apache License 2.0](LICENSE)
