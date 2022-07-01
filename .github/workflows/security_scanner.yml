@@ -33,7 +33,7 @@ jobs:
             echo "::set-output name=commmit_info:: [Push on Main]"
           fi
       - name: "Run GitLeaks scan"
-        uses: zricethezav/gitleaks-action@v1.6.0
+        uses: zricethezav/gitleaks-action@v2.0.4
         with:
           config-path: .security/credscan-config.toml
       - name: "Trigger the Notifier"
