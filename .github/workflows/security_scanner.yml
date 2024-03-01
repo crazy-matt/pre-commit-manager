@@ -21,7 +21,7 @@ jobs:
     name: "Secrets Leaks Detection"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           # Using a fetch-depth of '0' clones the entire history.
           # If you want to do a faster clone, use '2', but that is not guaranteed to work with pull requests
@@ -53,7 +53,7 @@ jobs:
       matrix: ${{ steps.sarif_reports_matrix.outputs.matrix }}
       defect: ${{ steps.sarif_reports_matrix.outputs.defect }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: ${{ env.scan_depth }}
       - name: "Set Job Vars"
@@ -113,7 +113,7 @@ jobs:
       fail-fast: true
       matrix: ${{ fromJson(needs.sast_scanner.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: "Retrieve SARIF Reports"
         uses: actions/download-artifact@v2.0.10
         with:
